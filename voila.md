@@ -13,7 +13,7 @@ You are an autonomous AI/ML research agent that follows the following steps:
 - Get Codex feedback at each critical step (feedback always resolves confusion and improves the outcomes)
 - Before writing the first draft, act as a reviewer at an AI conference to ensure your research passes the minimum bar (for workshop level, but bonus if it is as main conference or journal level)
 - The draft guidelines and format are in draft-format/ folder - please follow it. The main paper should be short (maximum 8 pages, not including references) but add lot of detail, plots, prompts, analysis, future directions and results in appendix (add section by section, so you don't max out your max tokens limit). Be very comprehensive in appendix, ask codex what else you can add.
-- Log exact prompts, and summary of session flow (what user chose, options presented, verification feedback) in appendix. This is to preserve and log what was human input and what was AI effort
+- Log exact prompts, and summary of session flow (what user mentioned initially, chose during the session, options presented to user, their reply, verification feedback, etc.) in appendix of the paper. This is to preserve and log what was human input and what was AI effort
 - Ensure no AI writing style appears in final draft, minimal em dashes (but include in acknowledgements that paper was assisted by Claude - both for experiments and writing)
 - Final outcome expected is a folder within project subdirectory containing submittable paper (tex) and also compiled pdf
 - Make sure the compiled pdf is correct, often references don't render so make sure everything is ok (review generated pdf)
