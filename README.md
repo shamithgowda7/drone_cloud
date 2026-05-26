@@ -1,5 +1,7 @@
 This is [Lossfunk's](lossfunk.com) autoresearch prompt for beginner / student researchers in ML/AI.
 
+[Slides that describe Autovoila](https://docs.google.com/presentation/d/1vYuz5glxBkTkqQgHIuIldrJYAe0j_2M0xTMxfJ2zRKU/edit?usp=sharing) with examples.
+
 ## How to use it
 - Install Claude Code (and have a subscription for it!)
 - Install CCO https://github.com/nikvdp/cco to run claude code safely in YOLO mode (we recommend --backend docker flag for cco)
