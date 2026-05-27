@@ -1,6 +1,6 @@
 This is [Lossfunk's](lossfunk.com) autoresearch prompt for beginner / student researchers in ML/AI.
 
-[Slides that describe Autovoila](https://docs.google.com/presentation/d/1vYuz5glxBkTkqQgHIuIldrJYAe0j_2M0xTMxfJ2zRKU/edit?usp=sharing) with examples.
+[Watch the video session on Autovoila](https://www.youtube.com/watch?v=ouQELzH5Zqc) or go through [slides that describe Autovoila](https://docs.google.com/presentation/d/1vYuz5glxBkTkqQgHIuIldrJYAe0j_2M0xTMxfJ2zRKU/edit?usp=sharing) with examples.
 
 ## How to use it
 - Install Claude Code (and have a subscription for it!)
