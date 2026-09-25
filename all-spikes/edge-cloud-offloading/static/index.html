@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DroneCloud — ProAdapt Predictive-Adaptive Offloading Simulator</title>
+  <meta name="description" content="Real-time drone fleet management simulator demonstrating ProAdapt: lightweight predict-then-optimize edge-cloud offloading for cloud computing research.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- ─── HEADER ─── -->
+  <header id="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" stroke="url(#g1)" stroke-width="2"/>
+          <path d="M10 16L16 10L22 16L16 22Z" fill="url(#g1)" opacity="0.7"/>
+          <circle cx="16" cy="16" r="3" fill="#06b6d4"/>
+          <line x1="16" y1="6" x2="16" y2="11" stroke="#06b6d4" stroke-width="1.5"/>
+          <line x1="16" y1="21" x2="16" y2="26" stroke="#06b6d4" stroke-width="1.5"/>
+          <line x1="6" y1="16" x2="11" y2="16" stroke="#06b6d4" stroke-width="1.5"/>
+          <line x1="21" y1="16" x2="26" y2="16" stroke="#06b6d4" stroke-width="1.5"/>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#06b6d4"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div>
+        <h1>DroneCloud <span class="research-tag">ProAdapt ML</span></h1>
+        <p class="subtitle">Lightweight Predict-then-Optimize Edge-Cloud Offloading</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill" id="statusPill">
+        <span class="pulse"></span>
+        <span>Connecting…</span>
+      </div>
+      <div class="tick-counter">Tick <span id="tickNum">0</span></div>
+    </div>
+  </header>
+
+  <!-- ─── PROADAPT ML BANNER ─── -->
+  <section class="ml-banner" id="mlBanner">
+    <div class="ml-banner-item">
+      <span class="ml-tag">Algorithm</span>
+      <span class="ml-value highlight-cyan">ProAdapt (Predict-then-Optimize)</span>
+    </div>
+    <div class="ml-banner-item">
+      <span class="ml-tag">Q-Table Space</span>
+      <span class="ml-value"><span id="qActive">0</span> / 648 entries <span class="badge-sub">(5.1 KB)</span></span>
+    </div>
+    <div class="ml-banner-item">
+      <span class="ml-tag">Exploration (&epsilon;)</span>
+      <span class="ml-value" id="qEpsilon">0.250</span>
+    </div>
+    <div class="ml-banner-item">
+      <span class="ml-tag">Proactive Shifts</span>
+      <span class="ml-value highlight-amber"><span id="qShifts">0</span> battery saves</span>
+    </div>
+    <div class="ml-banner-item">
+      <span class="ml-tag">Inference Overhead</span>
+      <span class="ml-value highlight-emerald"><span id="qOverhead">~3.5</span> &mu;s <span class="badge-speedup">3,500&times; vs Deep RL</span></span>
+    </div>
+  </section>
+
+  <!-- ─── METRICS BAR ─── -->
+  <section id="metricsBar">
+    <div class="metric-card" id="mcFleet">
+      <div class="mc-icon fleet-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Fleet Size</span>
+        <span class="mc-value" id="vFleet">12 UAVs</span>
+      </div>
+    </div>
+    <div class="metric-card" id="mcBattery">
+      <div class="mc-icon batt-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="18" height="12" rx="2"/><line x1="22" y1="10" x2="22" y2="14"/><rect x="4" y="8" width="8" height="8" rx="1" fill="currentColor" opacity="0.3"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Fleet Battery</span>
+        <span class="mc-value" id="vBattery">—</span>
+      </div>
+    </div>
+    <div class="metric-card" id="mcTasks">
+      <div class="mc-icon task-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Tasks Done</span>
+        <span class="mc-value" id="vTasks">0</span>
+      </div>
+    </div>
+    <div class="metric-card" id="mcDeadline">
+      <div class="mc-icon deadline-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Deadline Hit</span>
+        <span class="mc-value" id="vDeadline">—</span>
+      </div>
+    </div>
+    <div class="metric-card" id="mcCloud">
+      <div class="mc-icon cloud-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Cloud Load</span>
+        <span class="mc-value" id="vCloud">—</span>
+      </div>
+    </div>
+    <div class="metric-card" id="mcScale">
+      <div class="mc-icon scale-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="mc-body">
+        <span class="mc-label">Auto-Scale</span>
+        <span class="mc-value" id="vScale">1.0×</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── MAIN GRID ─── -->
+  <main id="mainGrid">
+    <!-- LEFT: Map -->
+    <section class="panel map-panel" id="mapPanel">
+      <div class="panel-header">
+        <h2>Fleet Operations Map</h2>
+        <span class="badge" id="activeDrones">12 active</span>
+      </div>
+      <div id="map"></div>
+      <div class="map-legend">
+        <span><i class="dot dot-green"></i> Active</span>
+        <span><i class="dot dot-amber"></i> Low Battery</span>
+        <span><i class="dot dot-blue"></i> Charging</span>
+        <span><i class="dot dot-purple"></i> Edge Task</span>
+        <span><i class="dot dot-cyan"></i> Cloud Task</span>
+      </div>
+
+      <!-- 4-Strategy Comparison Summary Table -->
+      <div class="strategy-summary-card">
+        <h3>4-Strategy Ablation Benchmark (Real-Time)</h3>
+        <table class="strat-table">
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Hit Rate</th>
+              <th>Avg Time</th>
+              <th>Avg Latency</th>
+              <th>Edge Ratio</th>
+              <th>Overhead</th>
+            </tr>
+          </thead>
+          <tbody id="stratTableBody">
+            <tr id="rowProadapt" class="row-highlight">
+              <td><strong>ProAdapt (Predictive RL)</strong></td>
+              <td id="paHit">—</td>
+              <td id="paTime">—</td>
+              <td id="paLat">—</td>
+              <td id="paEdge">—</td>
+              <td>&lt; 5 &mu;s</td>
+            </tr>
+            <tr id="rowReactive">
+              <td>Reactive Q-Learning</td>
+              <td id="rqHit">—</td>
+              <td id="rqTime">—</td>
+              <td id="rqLat">—</td>
+              <td id="rqEdge">—</td>
+              <td>&lt; 5 &mu;s</td>
+            </tr>
+            <tr id="rowHeuristic">
+              <td>Heuristic (6-factor)</td>
+              <td id="hHit">—</td>
+              <td id="hTime">—</td>
+              <td id="hLat">—</td>
+              <td id="hEdge">—</td>
+              <td>~2 &mu;s</td>
+            </tr>
+            <tr id="rowStatic">
+              <td>Static (Always Cloud)</td>
+              <td id="sHit">—</td>
+              <td id="sTime">—</td>
+              <td id="sLat">—</td>
+              <td id="sEdge">—</td>
+              <td>0.1 &mu;s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RIGHT: Charts -->
+    <section class="charts-col">
+      <!-- 4-Strategy Comparison: Avg Completion Time -->
+      <div class="panel chart-panel">
+        <div class="panel-header">
+          <h2>Avg Completion Time</h2>
+          <span class="badge badge-green">4-Strategy Comparison</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartTime"></canvas></div>
+      </div>
+      <!-- 4-Strategy Comparison: Deadline Hit Rate -->
+      <div class="panel chart-panel">
+        <div class="panel-header">
+          <h2>Deadline Hit Rate</h2>
+          <span class="badge badge-violet">% Met</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartDeadline"></canvas></div>
+      </div>
+      <!-- Edge vs Cloud split -->
+      <div class="panel chart-panel chart-small">
+        <div class="panel-header">
+          <h2>ProAdapt Task Split</h2>
+        </div>
+        <div class="chart-wrap doughnut-wrap"><canvas id="chartSplit"></canvas></div>
+      </div>
+      <!-- Cloud Scaling -->
+      <div class="panel chart-panel chart-small">
+        <div class="panel-header">
+          <h2>Cloud Capacity Scale</h2>
+        </div>
+        <div class="chart-wrap doughnut-wrap"><canvas id="chartScale"></canvas></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ─── EVENT LOG ─── -->
+  <section class="panel" id="eventPanel">
+    <div class="panel-header">
+      <h2>Offloading Decision &amp; Forecasting Log</h2>
+      <span class="badge" id="eventCount">0 events</span>
+    </div>
+    <div id="eventLog" class="event-log"></div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <p>Cloud Computing Coursework &bull; <strong>ProAdapt</strong>: Lightweight Predict-then-Optimize Offloading for Battery-Constrained Drone Fleets</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
